@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Management Form</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f5f7fa;
+        }
+        
+        .loading {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        
+        .spinner {
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top: 4px solid #3b82f6;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .preview-image {
+            max-width: 100%;
+            max-height: 150px;
+            margin-top: 10px;
+            display: none;
+            border-radius: 4px;
+            border: 1px solid #e5e7eb;
+        }
+        
+        .result {
+            display: none;
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 6px;
+        }
+        
+        .result.success {
+            background-color: #ecfdf5;
+            border: 1px solid #10b981;
+        }
+        
+        .result.error {
+            background-color: #fef2f2;
+            border: 1px solid #ef4444;
+        }
+        
+        pre {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            max-height: 300px;
+            overflow-y: auto;
+            padding: 10px;
+            background-color: rgba(255, 255, 255, 0.5);
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body class="min-h-screen py-8">
+    <div id="loading" class="loading">
+        <div class="spinner"></div>
+    </div>
+
+    <div class="container max-w-4xl mx-auto px-4">
+        <div class="bg-white shadow-md rounded-lg p-6 mb-8">
+            <h1 class="text-2xl font-bold text-gray-800 mb-6">Product Management</h1>
+            
+            <form id="product-form" class="space-y-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="col-span-1 md:col-span-2">
+                        <label for="api-url" class="block text-sm font-medium text-gray-700 mb-1">API URL</label>
+                        <input type="text" id="api-url" value="https://api.mongodb.wromo.net" 
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
+                    </div>
+                    
+                    <div>
+                        <label for="auth-token" class="block text-sm font-medium text-gray-700 mb-1">Auth Token (Optional)</label>
+                        <input type="text" id="auth-token" placeholder="Bearer token for authenticated requests" 
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
+                    </div>
+                    
+                    <div>
+                        <label for="collection-name" class="block text-sm font-medium text-gray-700 mb-1">Collection Name</label>
+                        <input type="text" id="collection-name" value="products" 
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
+                    </div>
+                    
+                    <div class="col-span-1 md:col-span-2">
+                        <label for="title" class="block text-sm font-medium text-gray-700 mb-1">Product Title</label>
+                        <input type="text" id="title" placeholder="Enter product title" required 
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
+                    </div>
+                    
+                    <div class="col-span-1 md:col-span-2">
+                        <label for="description" class="block text-sm font-medium text-gray-700 mb-1">Product Description</label>
+                        <textarea id="description" placeholder="Enter product description" required rows="4"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"></textarea>
+                    </div>
+                    
+                    <div>
+                        <label for="price" class="block text-sm font-medium text-gray-700 mb-1">Price ($)</label>
+                        <input type="number" id="price" min="0" step="0.01" placeholder="Enter price" required 
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
+                    </div>
+                    
+                    <div>
+                        <label for="price-code" class="block text-sm font-medium text-gray-700 mb-1">Price Code</label>
+                        <select id="price-code" 
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                            <option value="price_1Rsx">$6.00</option>
+                            <option value="price_2Rsx">$12.00</option>
+                            <option value="price_3Rsx">$24.00</option>
+                            <option value="price_4Rsx">$48.00</option>
+                            <option value="price_5Rsx">$96.00</option>
+                        </select>
+                    </div>
+                    
+                    <div>
+                        <label for="image-url" class="block text-sm font-medium text-gray-700 mb-1">Image URL</label>
+                        <input type="url" id="image-url" placeholder="Enter image URL" required 
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
+                        <img id="image-preview" class="preview-image" alt="Product image preview" />
+                    </div>
+                    
+                    <div>
+                        <label for="buy-url" class="block text-sm font-medium text-gray-700 mb-1">Buy URL</label>
+                        <input type="url" id="buy-url" placeholder="Enter buy URL" required 
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
+                    </div>
+                    
+                    <div class="col-span-1 md:col-span-2">
+                        <label for="detail-url" class="block text-sm font-medium text-gray-700 mb-1">Detail URL</label>
+                        <input type="url" id="detail-url" placeholder="Enter detail URL" 
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
+                    </div>
+                </div>
+                
+                <div class="flex flex-wrap gap-4 pt-4">
+                    <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-6 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+                        Save Product
+                    </button>
+                    <button type="button" id="test-conn-btn" class="bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-6 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2">
+                        Test Connection
+                    </button>
+                    <button type="button" id="clear-form-btn" class="bg-gray-600 hover:bg-gray-700 text-white font-medium py-2 px-6 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2">
+                        Clear Form
+                    </button>
+                </div>
+            </form>
+        </div>
+        
+        <div id="result-container" class="result">
+            <h3 class="text-lg font-semibold mb-2">Result:</h3>
+            <pre id="result" class="text-sm"></pre>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Elements
+            const productForm = document.getElementById('product-form');
+            const apiUrlInput = document.getElementById('api-url');
+            const authTokenInput = document.getElementById('auth-token');
+            const collectionNameInput = document.getElementById('collection-name');
+            const titleInput = document.getElementById('title');
+            const descriptionInput = document.getElementById('description');
+            const priceInput = document.getElementById('price');
+            const priceCodeSelect = document.getElementById('price-code');
+            const imageUrlInput = document.getElementById('image-url');
+            const imagePreview = document.getElementById('image-preview');
+            const buyUrlInput = document.getElementById('buy-url');
+            const detailUrlInput = document.getElementById('detail-url');
+            const testConnBtn = document.getElementById('test-conn-btn');
+            const clearFormBtn = document.getElementById('clear-form-btn');
+            const resultContainer = document.getElementById('result-container');
+            const resultDisplay = document.getElementById('result');
+            const loadingIndicator = document.getElementById('loading');
+            
+            // Show/hide loading indicator
+            const showLoading = () => {
+                loadingIndicator.style.display = 'flex';
+            };
+            
+            const hideLoading = () => {
+                loadingIndicator.style.display = 'none';
+            };
+            
+            // Display result
+            const showResult = (data, isError = false) => {
+                resultContainer.style.display = 'block';
+                resultContainer.className = isError ? 'result error' : 'result success';
+                
+                if (typeof data === 'object') {
+                    resultDisplay.textContent = JSON.stringify(data, null, 2);
+                } else {
+                    resultDisplay.textContent = data;
+                }
+                
+                // Scroll to result
+                resultContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            };
+            
+            // Update price code based on price input
+            priceInput.addEventListener('change', () => {
+                const price = parseFloat(priceInput.value);
+                if (price <= 6) {
+                    priceCodeSelect.value = 'price_1Rsx';
+                } else if (price <= 12) {
+                    priceCodeSelect.value = 'price_2Rsx';
+                } else if (price <= 24) {
+                    priceCodeSelect.value = 'price_3Rsx';
+                } else if (price <= 48) {
+                    priceCodeSelect.value = 'price_4Rsx';
+                } else {
+                    priceCodeSelect.value = 'price_5Rsx';
+                }
+            });
+            
+            // Update price input based on price code
+            priceCodeSelect.addEventListener('change', () => {
+                switch (priceCodeSelect.value) {
+                    case 'price_1Rsx':
+                        priceInput.value = 6.00;
+                        break;
+                    case 'price_2Rsx':
+                        priceInput.value = 12.00;
+                        break;
+                    case 'price_3Rsx':
+                        priceInput.value = 24.00;
+                        break;
+                    case 'price_4Rsx':
+                        priceInput.value = 48.00;
+                        break;
+                    case 'price_5Rsx':
+                        priceInput.value = 96.00;
+                        break;
+                }
+            });
+            
+            // Preview image
+            imageUrlInput.addEventListener('change', () => {
+                const imageUrl = imageUrlInput.value.trim();
+                if (imageUrl) {
+                    imagePreview.src = imageUrl;
+                    imagePreview.style.display = 'block';
+                    imagePreview.onerror = () => {
+                        imagePreview.style.display = 'none';
+                        showResult({
+                            success: false,
+                            error: 'Invalid image URL. The image could not be loaded.'
+                        }, true);
+                    };
+                } else {
+                    imagePreview.style.display = 'none';
+                }
+            });
+            
+            // Save product
+            productForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                
+                // Validate form
+                if (!titleInput.value.trim()) {
+                    showResult({ success: false, error: 'Product title is required' }, true);
+                    titleInput.focus();
+                    return;
+                }
+                
+                if (!descriptionInput.value.trim()) {
+                    showResult({ success: false, error: 'Product description is required' }, true);
+                    descriptionInput.focus();
+                    return;
+                }
+                
+                if (!priceInput.value || parseFloat(priceInput.value) <= 0) {
+                    showResult({ success: false, error: 'Valid price is required' }, true);
+                    priceInput.focus();
+                    return;
+                }
+                
+                if (!imageUrlInput.value.trim()) {
+                    showResult({ success: false, error: 'Image URL is required' }, true);
+                    imageUrlInput.focus();
+                    return;
+                }
+                
+                if (!buyUrlInput.value.trim()) {
+                    showResult({ success: false, error: 'Buy URL is required' }, true);
+                    buyUrlInput.focus();
+                    return;
+                }
+                
+                try {
+                    showLoading();
+                    const apiUrl = apiUrlInput.value.trim();
+                    const authToken = authTokenInput.value.trim();
+                    const collectionName = collectionNameInput.value.trim();
+                    
+                    // Create product object
+                    const product = {
+                        title: titleInput.value.trim(),
+                        description: descriptionInput.value.trim(),
+                        price: parseFloat(priceInput.value),
+                        addToCard: priceCodeSelect.value,
+                        imageUrl: imageUrlInput.value.trim(),
+                        buyUrl: buyUrlInput.value.trim(),
+                        detailUrl: detailUrlInput.value.trim(),
+                        createdAt: new Date().toISOString(),
+                        updatedAt: new Date().toISOString()
+                    };
+                    
+                    // Add metadata
+                    product.origin = window.location.origin || 'product-test';
+                    product.userAgent = navigator.userAgent;
+                    
+                    // Prepare headers
+                    const headers = {
+                        'Content-Type': 'application/json'
+                    };
+                    
+                    if (authToken) {
+                        headers['Authorization'] = authToken.startsWith('Bearer ') ? authToken : `Bearer ${authToken}`;
+                    }
+                    
+                    // Make API request
+                    const response = await fetch(`${apiUrl}/api/test-data/insert`, {
+                        method: 'POST',
+                        headers,
+                        body: JSON.stringify({
+                            collection: collectionName,
+                            document: product
+                        })
+                    });
+                    
+                    const responseData = await response.json();
+                    
+                    if (!response.ok) {
+                        throw new Error(responseData.error || 'Failed to save product');
+                    }
+                    
+                    showResult({
+                        success: true,
+                        message: 'Product saved successfully',
+                        product: product,
+                        response: responseData
+                    });
+                } catch (error) {
+                    console.error('Save error:', error);
+                    showResult({
+                        success: false,
+                        error: error.message || 'An unexpected error occurred'
+                    }, true);
+                } finally {
+                    hideLoading();
+                }
+            });
+            
+            // Test connection
+            testConnBtn.addEventListener('click', async () => {
+                try {
+                    showLoading();
+                    const apiUrl = apiUrlInput.value.trim();
+                    
+                    // Make API request to debug CORS endpoint
+                    const response = await fetch(`${apiUrl}/api/debug/cors`, {
+                        method: 'GET',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    });
+                    
+                    const responseData = await response.json();
+                    
+                    if (!response.ok) {
+                        throw new Error(responseData.error || 'Connection test failed');
+                    }
+                    
+                    showResult({
+                        success: true,
+                        message: 'Connection test successful',
+                        response: responseData
+                    });
+                } catch (error) {
+                    console.error('Connection test error:', error);
+                    showResult({
+                        success: false,
+                        error: error.message || 'Connection test failed'
+                    }, true);
+                } finally {
+                    hideLoading();
+                }
+            });
+            
+            // Clear form
+            clearFormBtn.addEventListener('click', () => {
+                titleInput.value = '';
+                descriptionInput.value = '';
+                priceInput.value = '';
+                priceCodeSelect.value = 'price_1Rsx';
+                imageUrlInput.value = '';
+                imagePreview.style.display = 'none';
+                buyUrlInput.value = '';
+                detailUrlInput.value = '';
+                resultContainer.style.display = 'none';
+            });
+            
+            // Initialize with sample data
+            titleInput.value = 'Sample Product';
+            descriptionInput.value = 'My sample product responsive';
+            priceInput.value = '24.00';
+            priceCodeSelect.value = 'price_3Rsx';
+            imageUrlInput.value = 'https://images.unsplash.com/photo-1523275335684-37898b6baf30';
+            buyUrlInput.value = 'https://example.com/buy';
+            detailUrlInput.value = 'https://example.com/details';
+            
+            // Trigger image preview
+            imageUrlInput.dispatchEvent(new Event('change'));
+        });
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'941b8604b3505bbd',t:'MTc0NzU3MzA3OS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
